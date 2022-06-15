@@ -1,11 +1,18 @@
 import Head from "next/head";
 import { useState, useEffect, useCallback } from "react";
 import styles from "../styles/Home.module.css";
+import dynamic from "next/dynamic";
+// Will only import `react-p5` on client-side
+const Sketch = dynamic(() => import("react-p5").then((mod) => mod.default), {
+  ssr: false,
+});
 
 export default function Home() {
   const [audioContext, setAudioContext] = useState(null);
   const [audioBuffer, setAudioBuffer] = useState(null);
-  const [audio, setAudio] = useState(null);
+  const [analizerNode, setAnalizerNode] = useState(null);
+  const [analizerData, setAnalizerData] = useState(null);
+  const [gainNode, setGainNode] = useState(null);
 
   const ref = useCallback((node) => {
     if (node) {
@@ -27,15 +34,37 @@ export default function Home() {
   }, []);
 
   const playSound = () => {
-    console.log("playSound", audio, audioContext);
+    console.log("playSound", audioContext);
     const source = audioContext.createBufferSource();
     source.connect(audioContext.destination);
     source.buffer = audioBuffer;
     source.start();
   };
 
-  const stopSound = () => {
-    audio.pause();
+  // P5
+
+  const sketchRef = useCallback((node) => {
+    if (node) {
+      setAudio(node);
+    }
+  }, []);
+
+  const setup = (p) => {
+    p.createCanvas(p.windowWidth, p.windowHeight);
+    p.background(0);
+  };
+
+  const draw = (p) => {
+    p.background(0);
+    if (analizerNode) {
+    } else {
+      p.fill(255);
+      p.noStroke();
+      const dim = p.min(p.width, p.height);
+      p.polygon(0, 0, 82, 3);
+      // p.polygon(p.width / 2, p.height / 2, dim * 0.1, 3);
+      // console.log(p)
+    }
   };
 
   return (
@@ -46,7 +75,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <audio src="/Llama.mp3" ref={ref} />
+        <Sketch setup={setup} draw={draw} />
         <div onClick={() => playSound()}>holla</div>
       </main>
     </div>
